@@ -1,0 +1,11 @@
+# Tested with Python 3.10-3.12. torch 2.5.1 wheels target CUDA 12.4 (NVIDIA driver >= 525),
+# so they run on the T4; everything also runs (slower) on CPU.
+numpy>=1.24,<2.3
+opencv-python-headless==4.10.0.84
+# ultralytics depends on "opencv-python" (the GUI build that needs libGL). This local, empty
+# placeholder satisfies that requirement so only the headless build above provides cv2.
+./third_party/opencv_python-4.10.0.84-py3-none-any.whl
+torch==2.5.1
+torchvision==0.20.1
+ultralytics==8.4.162
+lap==0.5.13

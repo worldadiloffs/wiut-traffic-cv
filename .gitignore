@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+cache/
+samples/
+*.egg-info/
+.venv/
+docs/engine_test.html
+docs/clip12_test.webm

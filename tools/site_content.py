@@ -1,0 +1,106 @@
+"""Static text for the website (kept in code so the site is rebuilt from one command)."""
+
+RULES = [
+    {"id": "jaywalking",
+     "definition": "A pedestrian on the carriageway outside a crossing.",
+     "rule": "Ground point of a walking person (riders removed) inside the hand-drawn carriageway, ≥ 0.8 % of the frame from the kerb, "
+             "≥ 3 % away from every crossing and outside the bus-stop bay, for ≥ 1.2 s while moving ≥ 2 % of the frame. "
+             "Segments of the same class closer than 2 s are merged."},
+    {"id": "failure_to_yield",
+     "definition": "A vehicle drives through a crossing while a pedestrian is on it or stepping onto it.",
+     "rule": "A motor vehicle passes through a crossing polygon in ≤ 6 s at walking speed or faster, while a moving pedestrian is on "
+             "the same crossing (not at its kerb ends) within 10 % of the frame for ≥ 2 samples. Segment = vehicle enters → leaves."},
+    {"id": "red_light",
+     "definition": "A vehicle crosses the stop line while its signal is red.",
+     "rule": "Front of the vehicle (bottom of the box) crosses the near-arm stop line while the lamp reads red, ≥ 0.8 s after red "
+             "onset and ≥ 3 s before it ends, then enters the junction. Ignored when ≥ 3 vehicles cross within ±2 s (a platoon "
+             "means the approach really has green)."},
+    {"id": "stop_line",
+     "definition": "A vehicle stops past the stop line on red without entering the junction.",
+     "rule": "Vehicle stationary for ≥ 2 s between the stop line (≥ 1.2 % past it) and the far edge of the crossing while the lamp is red. "
+             "Segment = vehicle stops → signal turns green."},
+    {"id": "stopped_vehicle",
+     "definition": "A vehicle stationary on the carriageway for ≥ 10 s, not in a queue at a signal.",
+     "rule": "Car / bus / truck stationary ≥ 10 s on the carriageway; excluded in the signal approach, at crossings, at the frame border, "
+             "buses in the bus bay, and when another slow vehicle's box is within 3.5 % of the frame for most of the stop (queue)."},
+    {"id": "congestion",
+     "definition": "Traffic at a standstill or crawling across all lanes of a direction.",
+     "rule": "≥ 6 vehicles in the approach or the far carriageway with median speed < 0.1 box-heights/s and > 80 % of them slow, "
+             "for ≥ 12 s. In the signal approach only while the signal is green (a red queue is not congestion)."},
+    {"id": "wrong_way",
+     "definition": "A vehicle moves against the traffic direction of its lane.",
+     "rule": "Moving vehicle whose heading is opposite (cos < −0.6) to the learned flow field in coherent cells (resultant length > 0.85, "
+             "≥ 25 samples) outside the junction box, for ≥ 1.5 s and ≥ 5 % of the frame."},
+]
+
+FINDINGS = [
+    "The four clips are 4K (3840×2160) at 29.97 fps, not 25 fps: every time value in the pipeline is derived from the file's own fps.",
+    "The framing moves by up to 3.4 % of the frame between clips (the tripod was re-positioned), so a layout drawn once would miss the "
+    "crossings by up to 130 px in 4K. We register every video to one canonical frame (SIFT + RANSAC, 160–3,000 inliers per clip).",
+    "Two clips are at dusk and two are sunny midday footage with hard shadows. In sunlight the lit signal lamp is dim (≈ 30 levels of "
+    "redness instead of ≈ 220), so lamp scores are normalised per clip.",
+    "The boulevard signal cycles every ≈ 77–80 s (≈ 38 s red, ≈ 38 s green) in all clips; the phase reading lets rules separate a red "
+    "queue from congestion, and a stop-line violation from a normal stop.",
+    "Pedestrians often leave crossing A early and cut diagonally across the junction to the triangle island: the heatmap shows this path. "
+    "This is the main source of jaywalking segments.",
+    "When the junction is blocked (C3905, 1:18–1:56) the approach queue stops on crossing A during red while people walk between the "
+    "cars: a stop-line violation, not a red-light run.",
+    "COCO detectors see white-painted tree trunks as people and riders as pedestrians. We drop persons that never move and persons that "
+    "overlap a bicycle / motorcycle for most of their track.",
+]
+
+REPORT = """
+<h3>What we built</h3>
+<p>A one-command pipeline (<code>python run_submission.py --videos DIR</code>) that registers each video to a canonical view, tracks road
+users with YOLO11s + ByteTrack at 7.5 fps, reads the boulevard signal from the lamp pixels, and turns tracks into events with seven
+geometric rules. Part B runs a lighter causal tracker and scores time-to-collision between road users.</p>
+<h3>What worked</h3>
+<ul>
+<li><b>Reading the signal from pixels.</b> The lamp on the median tip is visible in every clip; with per-clip normalisation it gives a
+clean red/green phase even in glare. Without it red_light, stop_line and congestion would be guesses.</li>
+<li><b>Registration.</b> One layout, four framings; the warped daylight clips line up with the dusk reference to a few pixels.</li>
+<li><b>Ground points in canonical coordinates + speeds in box heights per second.</b> One stationarity threshold works from the
+foreground to the far carriageway.</li>
+<li><b>Precision over coverage.</b> The metric averages F1 over every class we predict, so we only predict classes we can check.</li>
+</ul>
+<h3>What did not work (or not yet)</h3>
+<ul>
+<li><b>Accidents and near misses.</b> None of the sample clips contain one, so we could not tune a detector for them. Part A leaves both
+classes out; Part B anticipates accidents from time-to-collision, but its calibration is a design choice, not a measurement.</li>
+<li><b>Jaywalking boundaries.</b> People who walk just beside a crossing are ambiguous; our 3 % buffer is a judgement call and the
+largest source of disagreement with our own labels.</li>
+<li><b>Daylight signal.</b> In glare the phase switch is detected up to ~3 s late, so we ignore red-light crossings in the last 3 s of a
+red phase and platoons of ≥ 3 vehicles.</li>
+<li><b>Only one stop line is observable</b> (the near arm). Red-light running on the other approaches happens outside the frame.</li>
+<li>Turns (illegal_turn, illegal_u_turn) and solid-line crossings need lane-level markings; we have not mapped the lanes.</li>
+</ul>
+<h3>What we would do next</h3>
+<ul>
+<li>Fine-tune the detector on a few hundred frames of this camera (small, far pedestrians at the bus stop are missed at dusk).</li>
+<li>Map lanes and turn permissions to add illegal_turn / illegal_u_turn / solid_line_crossing.</li>
+<li>Train a clip classifier on DoTA / CCD for accident and near-miss confirmation and calibrate Part B on it.</li>
+<li>Label more of the footage to tune thresholds per class instead of by inspection.</li>
+</ul>
+"""
+
+ABLATIONS = {
+    "intro": "Small, targeted ablations on the sample clips (numbers from our runs; see tools/).",
+    "header": ["change", "effect", "decision"],
+    "rows": [
+        ["Detector YOLO11s @ 960 px vs @ 1280 px vs YOLO11m @ 1280 px",
+         "person boxes on 4 test frames: 80 vs 125 vs 157 (conf ≥ 0.15); CPU time 0.64 s vs 0.64 s vs 1.76 s per frame",
+         "YOLO11s @ 1280 px: +56 % people for the same cost as 960 px; 11m would not fit our CPU dev loop"],
+        ["Signal lamp at fixed pixel position (no registration)",
+         "lamp readable in 1 of 4 clips (the one we drew the layout on)",
+         "register every video (SIFT + RANSAC) before reading the lamp"],
+        ["Fixed lamp thresholds vs per-clip normalisation",
+         "sunny clips: 0 % of samples classified vs 94–97 % after normalising by the clip's 95th percentile",
+         "per-clip normalisation (Part A may look at the whole video)"],
+        ["Jaywalking: kerb margin 0 and crossing buffer 1.5 % vs 0.8 % / 3 %",
+         "C3905: 24 vs 4 segments; the extra ones were people at the kerb, riders and a static red sign",
+         "keep the stricter setting"],
+        ["Red light: plain phase test vs + ‘not in the last 3 s of red’ + platoon filter",
+         "C3896: 19 vs 1 detection; the 18 removed were the queue leaving at the phase switch (daylight lamp is late)",
+         "keep both filters"],
+    ],
+}

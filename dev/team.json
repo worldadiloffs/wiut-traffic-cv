@@ -1,0 +1,54 @@
+[
+ {
+  "name": "Abdumajid Adilov",
+  "role": "Team captain · ML & systems",
+  "did": "Pipeline design, detection/tracking, scene registration, event rules, evaluation harness.",
+  "projects": "FitAI (Flutter fitness app, founder/CTO); Eco-Schools Uzbekistan projects",
+  "links": [
+   [
+    "GitHub",
+    "https://github.com/worldadiloffs"
+   ],
+   [
+    "LinkedIn — add link",
+    ""
+   ],
+   [
+    "Portfolio — add link",
+    ""
+   ]
+  ]
+ },
+ {
+  "name": "Team member 2 — add name",
+  "role": "add role",
+  "did": "add contribution",
+  "projects": "",
+  "links": [
+   [
+    "GitHub — add link",
+    ""
+   ],
+   [
+    "LinkedIn — add link",
+    ""
+   ]
+  ]
+ },
+ {
+  "name": "Team member 3 — add name",
+  "role": "add role",
+  "did": "add contribution",
+  "projects": "",
+  "links": [
+   [
+    "GitHub — add link",
+    ""
+   ],
+   [
+    "LinkedIn — add link",
+    ""
+   ]
+  ]
+ }
+]

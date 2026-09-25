@@ -1,0 +1,27 @@
+[
+ [
+  "Source code (GitHub)",
+  "https://github.com/worldadiloffs/wiut-traffic-cv",
+  "solution.py, src/, tools/, README"
+ ],
+ [
+  "Model weights",
+  "https://github.com/worldadiloffs/wiut-traffic-cv/tree/main/weights",
+  "yolo11s.pt, yolo11n.pt (Ultralytics, AGPL-3.0)"
+ ],
+ [
+  "predictions_samples.json",
+  "https://github.com/worldadiloffs/wiut-traffic-cv/blob/main/predictions_samples.json",
+  "our output on the four sample clips"
+ ],
+ [
+  "Dev labels",
+  "https://github.com/worldadiloffs/wiut-traffic-cv/blob/main/dev/dev_labels.json",
+  "our own labels of the sample clips"
+ ],
+ [
+  "Technical report",
+  "#report",
+  "this page"
+ ]
+]

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Junction Watch — WIUT Hackathon 2026 CV track</title>
+<meta name="description" content="Traffic event detection and accident anticipation from a fixed road camera in Tashkent. WIUT Hackathon 2026, Computer Vision track.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="#top"><span class="dot"></span>Junction&nbsp;Watch</a>
+    <nav id="nav">
+      <a href="#approach">Approach</a><a href="#eda">EDA</a><a href="#results">Results</a>
+      <a href="#demo">Live demo</a><a href="#report">Report</a><a href="#team">Team</a><a href="#links">Links</a>
+    </nav>
+    <button class="menu" id="menu" aria-label="menu">☰</button>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero wrap">
+  <p class="kicker">WIUT Hackathon 2026 · Computer Vision track · elimination task</p>
+  <h1>Traffic events and accident risk from one fixed road camera</h1>
+  <p class="lead">We watch a CCTV view of a signalised junction in Tashkent, report every traffic event as a time segment with a class,
+    and raise a risk score before a collision could happen. The system combines an open-weights detector and tracker with
+    geometry and signal state that we read from the image itself.</p>
+  <div class="stats" id="hero-stats"></div>
+  <div class="cta"><a class="btn" href="#demo">Try the live demo</a><a class="btn ghost" href="#results">See results on the samples</a></div>
+</section>
+
+<section id="approach" class="wrap">
+  <h2>Problem and approach</h2>
+  <p>Two outputs per video: <b>Part A</b> a list of <code>[start, end, class]</code> segments scored by temporal-IoU F1,
+    and <b>Part B</b> a causal per-frame probability that an accident starts within 5 s. There are no labels, so every
+    decision had to come from the footage: we built the pipeline around what the camera shows reliably.</p>
+  <div class="diagram" id="pipeline"></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Learned</h3>
+      <ul>
+        <li><b>YOLO11s</b> (COCO, open weights, AGPL-3.0) — people, bicycles, cars, motorcycles, buses, trucks at 1280 px, 7.5 fps.</li>
+        <li><b>ByteTrack</b> association (Ultralytics implementation).</li>
+        <li><b>Road flow field</b> — dominant travel direction per 20×20 px cell, learned from the tracks of the four sample clips (used for wrong-way).</li>
+        <li><b>Signal normalisation</b> — per-clip scaling of lamp colour scores (dusk vs. glare).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Rule-based</h3>
+      <ul>
+        <li><b>View registration</b> — SIFT + RANSAC homography to one canonical frame; the camera framing shifts ~3 % between clips.</li>
+        <li><b>Scene layout</b> — three crossings, the stop line, carriageway, refuge islands, approach and junction zones (drawn once).</li>
+        <li><b>Signal phase</b> — read from the pixels of the vehicle signal on the median tip.</li>
+        <li><b>Event rules</b> for 7 classes and a time-to-collision risk model (below).</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Class rules</h3>
+  <div class="rules" id="rules"></div>
+  <p class="note">Classes we do not predict (accident, near_miss, illegal turns, solid-line crossing, obstacles, fire) are left out on purpose:
+    the metric adds every predicted class to the average, so a class we cannot recognise reliably would only lower the score. Part B still
+    anticipates accidents from time-to-collision.</p>
+</section>
+
+<section id="eda" class="wrap">
+  <h2>EDA of the sample videos</h2>
+  <div class="table-wrap"><table id="video-table"></table></div>
+  <div class="grid2">
+    <figure class="card"><img src="img/reference.jpg" alt="canonical reference frame with the scene layout" loading="lazy"><figcaption>Canonical view with our layout: crossings (yellow), stop line (red), zones. Every clip is warped onto this frame.</figcaption></figure>
+    <figure class="card"><img src="img/registration.jpg" alt="registration overlay" loading="lazy"><figcaption>Registration check: a daylight clip warped onto the dusk reference (50/50 blend). Kerbs and markings line up.</figcaption></figure>
+    <figure class="card"><img src="img/heat_vehicles.jpg" alt="vehicle heatmap" loading="lazy"><figcaption>Where moving vehicles are (ground points, all clips).</figcaption></figure>
+    <figure class="card"><img src="img/heat_people.jpg" alt="pedestrian heatmap" loading="lazy"><figcaption>Where pedestrians are. Hot spots off the crossings are the diagonal shortcuts behind most jaywalking.</figcaption></figure>
+    <figure class="card"><img src="img/trajectories.jpg" alt="trajectories coloured by direction" loading="lazy"><figcaption>Vehicle trajectories coloured by heading (one clip).</figcaption></figure>
+    <figure class="card"><img src="img/flow.jpg" alt="flow field" loading="lazy"><figcaption>Learned flow field used for wrong-way detection (coherent cells only).</figcaption></figure>
+  </div>
+  <h3>Traffic over time</h3>
+  <div class="controls" id="count-controls"></div>
+  <div class="chart" id="count-chart"></div>
+  <h3>Signal cycle</h3>
+  <div class="chart" id="phase-chart"></div>
+  <div class="card findings">
+    <h3>Findings that shaped the solution</h3>
+    <ol id="findings"></ol>
+  </div>
+</section>
+
+<section id="results" class="wrap">
+  <h2>Results on the sample videos</h2>
+  <div class="tabs" id="video-tabs"></div>
+  <div class="player">
+    <video id="player" controls playsinline preload="metadata"></video>
+    <div class="timeline" id="timeline"></div>
+    <div class="chart small" id="risk-chart"></div>
+  </div>
+  <div class="table-wrap"><table id="events-table"></table></div>
+  <h3>Operator view</h3>
+  <p class="muted">What a city traffic centre would read off the same tracks: events per clip, how many pedestrians cross against the signal, and throughput of the boulevard approach.</p>
+  <div class="table-wrap"><table id="ops-table"></table></div>
+  <h3>Examples per class</h3>
+  <div class="examples" id="examples"></div>
+  <h3>Dev-set evaluation</h3>
+  <p id="dev-intro"></p>
+  <div class="table-wrap"><table id="dev-table"></table></div>
+  <h3>Ablations</h3>
+  <p class="muted" id="abl-intro"></p>
+  <div class="table-wrap"><table id="abl-table" class="wrapcells"></table></div>
+  <h3>Failure cases</h3>
+  <div class="examples" id="failures"></div>
+</section>
+
+<section id="demo" class="wrap">
+  <h2>Live demo</h2>
+  <p>Upload an <b>.mp4</b> from this camera (up to <b>2.5 minutes</b> and 500 MB; longer files are cut). Everything runs in your
+    browser with ONNX Runtime Web — the video never leaves your device. The demo uses the same layout and rules as the submission,
+    with a lighter detector (YOLO11n at 640 px, 5 fps) so it finishes in a few minutes on a laptop.</p>
+  <div class="demo card">
+    <div class="demo-row">
+      <label class="btn" for="file">Choose video</label>
+      <input type="file" id="file" accept="video/mp4,video/*" hidden>
+      <button class="btn ghost" id="sample-btn">Use a 20 s sample clip</button>
+      <select id="demo-fps" class="chip" title="frames analysed per second"><option value="5">5 fps (as described)</option><option value="3">3 fps (faster)</option></select>
+      <span id="demo-status" class="muted">Model not loaded yet.</span>
+    </div>
+    <div class="progress"><div id="demo-bar"></div></div>
+    <div class="demo-view hidden" id="demo-view">
+      <div class="stage"><video id="demo-video" playsinline muted></video><canvas id="demo-canvas"></canvas></div>
+    </div>
+    <div id="demo-results" class="hidden">
+      <div class="timeline" id="demo-timeline"></div>
+      <div class="chart small" id="demo-risk"></div>
+      <div class="table-wrap"><table id="demo-events"></table></div>
+    </div>
+    <div class="demo-row"><button class="btn ghost" id="demo-download" disabled>Download events JSON</button></div>
+  </div>
+</section>
+
+<section id="report" class="wrap">
+  <h2>Report</h2>
+  <div class="report" id="report-body"></div>
+</section>
+
+<section id="team" class="wrap">
+  <h2>Team</h2>
+  <div class="team" id="team-cards"></div>
+</section>
+
+<section id="links" class="wrap">
+  <h2>Links</h2>
+  <ul class="links" id="link-list"></ul>
+</section>
+</main>
+<footer class="wrap foot">Built for the WIUT Hackathon 2026. Open-source components are credited in the repository README.</footer>
+
+<script src="vendor/ort/ort.all.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
