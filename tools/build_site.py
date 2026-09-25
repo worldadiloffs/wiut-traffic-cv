@@ -243,7 +243,7 @@ def main():
         "videos": metas,
         "stats": [[f"{len(metas)}", "sample clips, 4K"], [f"{tot / 60:.1f} min", "of footage analysed"],
                   [f"{sum(m['people'] + m['vehicles'] for m in metas):,}", "tracks"],
-                  [f"{n_ev}", "events on the samples"], ["7", "event classes"], ["< 1.5×", "real time on a T4 (A+B)"]],
+                  [f"{n_ev}", "events on the samples"], ["7", "event classes"], [f"{dev.get('score_a', 0):.3f}", "Score A on our own dev labels"]],
         "rules": SC.RULES, "findings": SC.FINDINGS, "report": SC.REPORT, "ablations": SC.ABLATIONS,
         "signal_note": "red = boulevard stopped, green = boulevard moving. The cycle is stable at ≈ 77–80 s.",
         "examples": ex, "failures": failures, "dev": dev, "team": team, "links": links,

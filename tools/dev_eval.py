@@ -27,11 +27,12 @@ def main(pred_path: str, gt_path: str, out: str = str(ROOT / "dev" / "dev_eval.j
                      f'{pc["f1_mean"]:.2f}'])
     rows.append(["<b>Score A</b>", "", "", "", "", "", f'<b>{a["score_a"]:.3f}</b>'])
     table = {
-        "intro": ("We labelled the four sample clips ourselves with the organisers' start/end conventions "
-                  f"({sum(len(v['events']) for v in gt.values())} segments). Labels were made by watching the clips "
-                  "and by reviewing candidate events from a deliberately loose version of our rules, so they share "
-                  "some of our blind spots. Treat the numbers as a sanity check, not as a test-set estimate. "
-                  "Scores below are the official <code>evaluate.py</code> run on <code>predictions_samples.json</code>."),
+        "intro": ("We labelled the sample clips ourselves with the organisers' start/end conventions "
+                  f"({sum(len(v['events']) for v in gt.values())} segments). C3905 and C3902 were labelled by watching the clips "
+                  "and checking every candidate from a deliberately loose version of our rules; C3897 and C3896 only by "
+                  "verifying our own detections frame by frame, so on those two clips the table measures precision, not recall. "
+                  "The labels share our blind spots: treat these numbers as a sanity check, not a test-set estimate. "
+                  "Scores are the official <code>evaluate.py</code> run on <code>predictions_samples.json</code>."),
         "header": ["class", "labelled", "predicted", "F1@0.3", "F1@0.5", "F1@0.7", "mean F1"],
         "rows": rows,
         "score_a": a["score_a"],

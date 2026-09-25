@@ -1,0 +1,30 @@
+[
+ {
+  "cls": "failure_to_yield",
+  "video": "C3902.mp4",
+  "t": 244.0,
+  "img": "img/fail/C3902_failure_to_yield_244.jpg",
+  "note": "Occlusion: a bus hides the far crossing; we flagged a car whose pedestrians were still on the kerb. Not in our labels (false positive)."
+ },
+ {
+  "cls": "failure_to_yield",
+  "video": "C3902.mp4",
+  "t": 12.8,
+  "img": "img/fail/C3902_failure_to_yield_12.jpg",
+  "note": "Pedestrians waiting at the kerb of crossing B look \u2018on the crossing\u2019 from this angle; the car passes them without a conflict (false positive)."
+ },
+ {
+  "cls": "jaywalking",
+  "video": "C3902.mp4",
+  "t": 100.0,
+  "img": "img/fail/C3902_jaywalking_100.jpg",
+  "note": "Far refuge island: at 40 px tall, 10 px of foot position decides kerb vs. road. We now ignore people under 4.5 % of the frame height, which also drops some true cases far away."
+ },
+ {
+  "cls": "stop_line",
+  "video": "C3905.mp4",
+  "t": 95.0,
+  "img": "img/fail/C3905_stop_line_95.jpg",
+  "note": "Blocked junction at dusk: the queue stands on crossing A for 40 s while people weave between cars. We report one long stop_line segment; annotators might split it or call part of it congestion."
+ }
+]

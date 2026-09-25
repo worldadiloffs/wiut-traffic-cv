@@ -104,10 +104,14 @@ class FrameReader:
     cheapest way to advance an H.264 stream sequentially.
     """
 
-    def __init__(self, path: str, stride: int, queue_size: int = 16):
+    def __init__(self, path: str, stride: int, queue_size: int = 16,
+                 start_frame: int = 0, end_frame: int | None = None):
         import queue
         import threading
         self.cap = cv2.VideoCapture(path)
+        if start_frame:
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+        self.start_frame, self.end_frame = start_frame, end_frame
         self.stride = stride
         self.q: "queue.Queue" = queue.Queue(maxsize=queue_size)
         self.stop = False
@@ -116,8 +120,8 @@ class FrameReader:
         self.thread.start()
 
     def _run(self):
-        idx = 0
-        while not self.stop:
+        idx = self.start_frame
+        while not self.stop and (self.end_frame is None or idx < self.end_frame):
             if idx % self.stride == 0:
                 ok, frame = self.cap.read()
                 if not ok:
@@ -147,7 +151,8 @@ class FrameReader:
 
 
 def track_video(path: str, cfg: TrackerConfig | None = None, progress: bool = False,
-                deadline: float | None = None, frame_hook=None) -> tuple[np.ndarray, dict]:
+                deadline: float | None = None, frame_hook=None,
+                start_frame: int = 0, end_frame: int | None = None) -> tuple[np.ndarray, dict]:
     """Track a whole file.
 
     Returns (rows[N, 9], info). `frame_hook(idx, t, frame)` is called on every
@@ -161,7 +166,8 @@ def track_video(path: str, cfg: TrackerConfig | None = None, progress: bool = Fa
     stride = max(1, int(round(info["fps"] / cfg.target_fps)))
     info["stride"] = stride
     tracker = Tracker(cfg)
-    reader = FrameReader(path, stride)
+    start_frame = (start_frame // stride) * stride       # keep the global sampling grid
+    reader = FrameReader(path, stride, start_frame=start_frame, end_frame=end_frame)
     rows = []
     last_t = 0.0
     for idx, frame in reader:

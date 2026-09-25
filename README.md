@@ -77,10 +77,19 @@ max is smoothed (fast rise, slow decay). On normal traffic in the samples the sc
 
 ### Time budget
 
-Measured per video (4K, 29.97 fps) on the evaluation profile: decoding runs in a background thread while
-the detector runs; Part A stops taking new frames at 1.8 × duration (`TRAFFIC_PART_A_BUDGET`) and
-returns events from what it has seen; Part B stops running the detector if the video as a whole passes
-2.7 × duration. On a T4 both parts together take well under the 3 × budget.
+Part A reads the video once, sequentially; decoding runs in a background thread while the detector runs.
+Part A stops taking new frames at 1.8 × the video duration (`TRAFFIC_PART_A_BUDGET`) and returns events
+from what it has seen; Part B stops running its detector if the video as a whole passes 2.7 × duration,
+so a slow machine degrades the output instead of scoring an empty video. We developed on a 2-core CPU
+(YOLO11s at 1280 px: ~0.6 s per analysed frame), where that budget is not enough for a full pass; we have
+not been able to time the pipeline on a T4. On a GPU the detector is 20–50× faster, which leaves a wide
+margin at 7.5 analysed fps.
+
+`predictions_samples.json` was produced with the same pipeline in our CPU sandbox, restart-safely
+(`tools/extract_chunked.py`, 60 s windows; `tools/risk_chunked.py`; assembled by
+`tools/predict_samples.py` with the harness's own `clean_events`). On a GPU,
+`python run_submission.py --videos samples --out predictions_samples.json` produces it in one pass;
+tracks that cross a 60 s window boundary can differ slightly between the two.
 
 ### Determinism
 

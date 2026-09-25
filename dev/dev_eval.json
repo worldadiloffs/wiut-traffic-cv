@@ -1,0 +1,69 @@
+{
+ "intro": "We labelled the sample clips ourselves with the organisers' start/end conventions (95 segments). C3905 and C3902 were labelled by watching the clips and checking every candidate from a deliberately loose version of our rules; C3897 and C3896 only by verifying our own detections frame by frame, so on those two clips the table measures precision, not recall. The labels share our blind spots: treat these numbers as a sanity check, not a test-set estimate. Scores are the official <code>evaluate.py</code> run on <code>predictions_samples.json</code>.",
+ "header": [
+  "class",
+  "labelled",
+  "predicted",
+  "F1@0.3",
+  "F1@0.5",
+  "F1@0.7",
+  "mean F1"
+ ],
+ "rows": [
+  [
+   "failure_to_yield",
+   54,
+   54,
+   "0.96",
+   "0.96",
+   "0.94",
+   "0.96"
+  ],
+  [
+   "jaywalking",
+   23,
+   27,
+   "0.80",
+   "0.72",
+   "0.72",
+   "0.75"
+  ],
+  [
+   "red_light",
+   1,
+   1,
+   "1.00",
+   "1.00",
+   "1.00",
+   "1.00"
+  ],
+  [
+   "stop_line",
+   8,
+   8,
+   "1.00",
+   "1.00",
+   "1.00",
+   "1.00"
+  ],
+  [
+   "stopped_vehicle",
+   9,
+   9,
+   "1.00",
+   "1.00",
+   "1.00",
+   "1.00"
+  ],
+  [
+   "<b>Score A</b>",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "<b>0.941</b>"
+  ]
+ ],
+ "score_a": 0.9406913580246913
+}

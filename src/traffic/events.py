@@ -34,10 +34,11 @@ class Params:
     moving: float = 0.35
     # jaywalking
     jay_min_dur: float = 1.2
-    jay_cross_buffer: float = 0.03
+    jay_cross_buffer: float = 0.04
     jay_kerb_margin: float = 0.008
     jay_min_path: float = 0.03
     jay_min_net: float = 0.02
+    jay_min_height: float = 0.045
     # failure to yield
     fty_ped_dist: float = 0.16
     fty_min_samples: int = 2
@@ -54,6 +55,7 @@ class Params:
     # stopped vehicle
     stopped_min: float = 10.0
     queue_gap: float = 0.035
+    junction_wait: float = 45.0
     # congestion
     cong_min_veh: int = 6
     cong_speed: float = 0.10
@@ -182,7 +184,8 @@ def jaywalking(ctx: Context) -> list[tuple[float, float]]:
         near_cross = np.zeros(len(g), bool)
         for poly in polys:
             near_cross |= dist_to_poly(g, poly) < P.jay_cross_buffer
-        flag = on_road & ~near_cross & ~sc.in_zone(g, "bus_stop")
+        flag = (on_road & ~near_cross & ~sc.in_zone(g, "bus_stop") & ~sc.in_zone(g, "far_corner")
+                & (p.size > P.jay_min_height))       # far-away people: kerb position is not reliable
         for a, b in time_runs(p.t, flag, max_gap=0.8, min_len=P.jay_min_dur):
             i, j = p.at(a), p.at(b)
             path = np.linalg.norm(np.diff(g[i:j + 1], axis=0), axis=1).sum()
@@ -202,7 +205,7 @@ def failure_to_yield(ctx: Context) -> list[tuple[float, float]]:
         g = v.gp_s
         for cw_name, poly in sc.crosswalks.items():
             # a box cut by the bottom edge has no reliable ground point
-            inside = points_in_poly(g, poly) & (v.box[:, 3] < 0.985)
+            inside = points_in_poly(g, poly) & (v.box[:, 3] < 0.96)
             if inside.sum() < 2:
                 continue
             for i, j in runs(inside):
@@ -306,6 +309,8 @@ def stopped_vehicle(ctx: Context) -> list[tuple[float, float]]:
                 continue
             if sc.in_zone(pt, "near_approach")[0] or sc.in_zone(pt, "past_stop_line")[0]:
                 continue                        # signal queue
+            if sc.in_zone(pt, "intersection")[0] and e - s < P.junction_wait:
+                continue                        # waiting inside the junction to turn (yielding)
             if min(dist_to_poly(pt, poly)[0] for poly in sc.crosswalks.values()) < 0.03:
                 continue                        # waiting at a crossing
             bx = v.box[mid]
@@ -336,12 +341,12 @@ def congestion(ctx: Context) -> list[tuple[float, float]]:
             items = ctx._veh_at[t]
             pts = np.array([it[1] for it in items])
             spd = np.array([it[2] for it in items])
-            inz = sc.in_zone(pts, zone)
+            inz = sc.in_zone(pts, zone) & ~sc.in_zone(pts, "bus_stop")
             if inz.sum() < P.cong_min_veh:
                 continue
             if np.median(spd[inz]) < P.cong_speed and np.mean(spd[inz] < P.moving) > 0.8:
                 flag[n] = True
-        if zone == "near_approach" and ctx.has_signal:
+        if ctx.has_signal:                          # both boulevard directions share the phase
             flag &= ctx.phase(times) == GREEN      # a queue at red is not congestion
         out += time_runs(times, flag, max_gap=3.0, min_len=P.cong_min_dur)
     return out
@@ -353,6 +358,8 @@ def wrong_way(ctx: Context) -> list[tuple[float, float]]:
         return []
     out = []
     for v in ctx.vehicles:
+        if v.cls not in MOTOR:
+            continue                      # bicycles legitimately ride both ways on crossings
         g, vel = v.gp_s, v.vel
         spd = np.linalg.norm(vel, axis=1)
         moving = v.speed_rel > P.moving
@@ -361,7 +368,8 @@ def wrong_way(ctx: Context) -> list[tuple[float, float]]:
         f, coh, cnt = sc.flow_at(g)
         u = vel / np.maximum(spd[:, None], 1e-9)
         cos = (u * f).sum(1)
-        valid = moving & (coh > P.ww_coh) & (cnt > P.ww_cnt) & ~sc.in_zone(g, "intersection")
+        valid = (moving & (coh > P.ww_coh) & (cnt > P.ww_cnt) & ~sc.in_zone(g, "intersection")
+                 & ~sc.in_crosswalk(g, pad=0.3))
         against = valid & (cos < P.ww_cos)
         for s, e in time_runs(v.t, against, max_gap=1.0, min_len=P.ww_min_dur):
             i, j = v.at(s), v.at(e)

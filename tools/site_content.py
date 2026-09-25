@@ -21,12 +21,12 @@ RULES = [
              "Segment = vehicle stops → signal turns green."},
     {"id": "stopped_vehicle",
      "definition": "A vehicle stationary on the carriageway for ≥ 10 s, not in a queue at a signal.",
-     "rule": "Car / bus / truck stationary ≥ 10 s on the carriageway; excluded in the signal approach, at crossings, at the frame border, "
+     "rule": "Car / bus / truck stationary ≥ 10 s on the carriageway; excluded in the signal approach, inside the junction for < 45 s (waiting to turn), at crossings, at the frame border, "
              "buses in the bus bay, and when another slow vehicle's box is within 3.5 % of the frame for most of the stop (queue)."},
     {"id": "congestion",
      "definition": "Traffic at a standstill or crawling across all lanes of a direction.",
      "rule": "≥ 6 vehicles in the approach or the far carriageway with median speed < 0.1 box-heights/s and > 80 % of them slow, "
-             "for ≥ 12 s. In the signal approach only while the signal is green (a red queue is not congestion)."},
+             "for ≥ 12 s, only while the boulevard signal is green (a red queue is not congestion); buses in the bus bay are ignored."},
     {"id": "wrong_way",
      "definition": "A vehicle moves against the traffic direction of its lane.",
      "rule": "Moving vehicle whose heading is opposite (cos < −0.6) to the learned flow field in coherent cells (resultant length > 0.85, "

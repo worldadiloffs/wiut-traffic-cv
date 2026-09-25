@@ -12,11 +12,11 @@ export const RED = 1, GREEN = -1, UNKNOWN = 0;
 
 export const P = {
   still: 0.12, moving: 0.35,
-  jay_min_dur: 1.2, jay_cross_buffer: 0.03, jay_kerb_margin: 0.008, jay_min_path: 0.03, jay_min_net: 0.02,
+  jay_min_dur: 1.2, jay_cross_buffer: 0.04, jay_min_height: 0.045, jay_kerb_margin: 0.008, jay_min_path: 0.03, jay_min_net: 0.02,
   fty_ped_dist: 0.16, fty_min_samples: 2, fty_u_margin: 0.12, fty_max_cross: 6.0, fty_ped_moving: 0.25,
   red_grace: 0.8, red_tail: 3.0, red_platoon: 3,
   stop_min_still: 2.0, stop_margin: 0.012,
-  stopped_min: 10.0, queue_gap: 0.035,
+  stopped_min: 10.0, queue_gap: 0.035, junction_wait: 45.0,
   cong_min_veh: 6, cong_speed: 0.10, cong_min_dur: 12.0,
   ww_coh: 0.85, ww_cnt: 25, ww_cos: -0.6, ww_min_dur: 1.5, ww_min_dist: 0.05,
 };
@@ -337,7 +337,8 @@ export function detectEvents(tracks, scene, sigT, phase, duration) {
   for (const p of peds) {
     const flag = p.t.map((_, i) => {
       const x = p.gx[i], y = p.gy[i];
-      if (!scene.onRoad(x, y, P.jay_kerb_margin) || scene.inZone(x, y, "bus_stop")) return false;
+      if (!scene.onRoad(x, y, P.jay_kerb_margin) || scene.inZone(x, y, "bus_stop") || scene.inZone(x, y, "far_corner")) return false;
+      if (p.box[i].y2 - p.box[i].y1 < P.jay_min_height) return false;
       return Object.values(scene.crosswalks).every(poly => distToPoly(x, y, poly) >= P.jay_cross_buffer);
     });
     for (const [a, b] of timeRuns(p.t, flag, 0.8, P.jay_min_dur)) {
@@ -351,7 +352,7 @@ export function detectEvents(tracks, scene, sigT, phase, duration) {
   for (const v of veh) {
     if (!VEHICLES.has(v.cls)) continue;
     for (const [name, poly] of Object.entries(scene.crosswalks)) {
-      const inside = v.t.map((_, i) => inPoly(v.gx[i], v.gy[i], poly) && v.box[i].y2 < 0.985);
+      const inside = v.t.map((_, i) => inPoly(v.gx[i], v.gy[i], poly) && v.box[i].y2 < 0.96);
       for (const [i, j] of runsOf(inside)) {
         const sp = v.speed.slice(i, j + 1).sort((a, b) => a - b);
         if (v.t[j] - v.t[i] > P.fty_max_cross || sp[Math.floor(sp.length / 2)] < P.moving) continue;
@@ -416,6 +417,7 @@ export function detectEvents(tracks, scene, sigT, phase, duration) {
       const i = v.at(s), j = v.at(e), m = Math.floor((i + j) / 2), x = v.gx[m], y = v.gy[m], b = v.box[m];
       if (v.cls === 5 && scene.inZone(x, y, "bus_stop")) continue;
       if (scene.inZone(x, y, "near_approach") || scene.inZone(x, y, "past_stop_line")) continue;
+      if (scene.inZone(x, y, "intersection") && e - s < P.junction_wait) continue;
       if (Object.values(scene.crosswalks).some(poly => distToPoly(x, y, poly) < 0.03)) continue;
       if (b.x1 < 0.005 || b.x2 > 0.995 || b.y2 > 0.995) continue;
       let q = 0, n = 0;
@@ -433,21 +435,23 @@ export function detectEvents(tracks, scene, sigT, phase, duration) {
   const times = [...vehAt.keys()].map(Number).sort((a, b) => a - b);
   for (const zone of ["near_approach", "far_carriageway"]) {
     const flag = times.map(t => {
-      const items = vehAt.get(t.toFixed(3)).filter(it => scene.inZone(it[1], it[2], zone));
+      const items = vehAt.get(t.toFixed(3)).filter(it => scene.inZone(it[1], it[2], zone) && !scene.inZone(it[1], it[2], "bus_stop"));
       if (items.length < P.cong_min_veh) return false;
       const sp = items.map(it => it[3]).sort((a, b) => a - b);
       const ok = sp[Math.floor(sp.length / 2)] < P.cong_speed && sp.filter(s => s < P.moving).length / sp.length > 0.8;
-      return ok && (zone !== "near_approach" || !hasSignal || phaseAt(sigT, phase, t) === GREEN);
+      return ok && (!hasSignal || phaseAt(sigT, phase, t) === GREEN);
     });
     out.congestion.push(...timeRuns(times, flag, 3.0, P.cong_min_dur));
   }
   // wrong way
   out.wrong_way = [];
   if (scene.flow) for (const v of veh) {
+    if (!VEHICLES.has(v.cls)) continue;
     const against = v.t.map((_, i) => {
       if (v.speed[i] <= P.moving) return false;
       const f = scene.flowAt(v.gx[i], v.gy[i]);
       if (!f || f.coh <= P.ww_coh || f.cnt <= P.ww_cnt || scene.inZone(v.gx[i], v.gy[i], "intersection")) return false;
+      if (Object.values(scene.crosswalks).some(poly => distToPoly(v.gx[i], v.gy[i], poly) < 0.02)) return false;
       const n = Math.hypot(v.vx[i], v.vy[i]) || 1e-9;
       return (v.vx[i] * f.vec[0] + v.vy[i] * f.vec[1]) / n < P.ww_cos;
     });

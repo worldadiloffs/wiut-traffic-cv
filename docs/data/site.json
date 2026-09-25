@@ -1,6 +1,45 @@
 {
  "videos": [
   {
+   "name": "C3896.mp4",
+   "stem": "C3896",
+   "duration": 340.3733666666667,
+   "fps": 29.97002997002997,
+   "source": "3840×2160",
+   "lighting": "sunny midday",
+   "shift": 0.03368938528289522,
+   "people": 606,
+   "vehicles": 629,
+   "cycles": 5,
+   "annotated": "video/C3896_annotated.mp4"
+  },
+  {
+   "name": "C3897.mp4",
+   "stem": "C3897",
+   "duration": 317.85086666666666,
+   "fps": 29.97002997002997,
+   "source": "3840×2160",
+   "lighting": "sunny midday",
+   "shift": 0.034062260315342874,
+   "people": 602,
+   "vehicles": 564,
+   "cycles": 5,
+   "annotated": "video/C3897_annotated.mp4"
+  },
+  {
+   "name": "C3902.mp4",
+   "stem": "C3902",
+   "duration": 317.85086666666666,
+   "fps": 29.97002997002997,
+   "source": "3840×2160",
+   "lighting": "late afternoon",
+   "shift": 0.029039323868699896,
+   "people": 827,
+   "vehicles": 552,
+   "cycles": 4,
+   "annotated": "video/C3902_annotated.mp4"
+  },
+  {
    "name": "C3905.mp4",
    "stem": "C3905",
    "duration": 127.66086666666666,
@@ -16,19 +55,19 @@
  ],
  "stats": [
   [
-   "1",
+   "4",
    "sample clips, 4K"
   ],
   [
-   "2.1 min",
+   "18.4 min",
    "of footage analysed"
   ],
   [
-   "563",
+   "4,343",
    "tracks"
   ],
   [
-   "14",
+   "99",
    "events on the samples"
   ],
   [
@@ -36,8 +75,8 @@
    "event classes"
   ],
   [
-   "< 1.5×",
-   "real time on a T4 (A+B)"
+   "0.941",
+   "Score A on our own dev labels"
   ]
  ],
  "rules": [
@@ -64,12 +103,12 @@
   {
    "id": "stopped_vehicle",
    "definition": "A vehicle stationary on the carriageway for ≥ 10 s, not in a queue at a signal.",
-   "rule": "Car / bus / truck stationary ≥ 10 s on the carriageway; excluded in the signal approach, at crossings, at the frame border, buses in the bus bay, and when another slow vehicle's box is within 3.5 % of the frame for most of the stop (queue)."
+   "rule": "Car / bus / truck stationary ≥ 10 s on the carriageway; excluded in the signal approach, inside the junction for < 45 s (waiting to turn), at crossings, at the frame border, buses in the bus bay, and when another slow vehicle's box is within 3.5 % of the frame for most of the stop (queue)."
   },
   {
    "id": "congestion",
    "definition": "Traffic at a standstill or crawling across all lanes of a direction.",
-   "rule": "≥ 6 vehicles in the approach or the far carriageway with median speed < 0.1 box-heights/s and > 80 % of them slow, for ≥ 12 s. In the signal approach only while the signal is green (a red queue is not congestion)."
+   "rule": "≥ 6 vehicles in the approach or the far carriageway with median speed < 0.1 box-heights/s and > 80 % of them slow, for ≥ 12 s, only while the boulevard signal is green (a red queue is not congestion); buses in the bus bay are ignored."
   },
   {
    "id": "wrong_way",
@@ -126,17 +165,17 @@
  "examples": [
   {
    "cls": "jaywalking",
-   "video": "C3905.mp4",
-   "t": 73.7,
-   "img": "img/ex/C3905_jaywalking_736.jpg",
-   "note": "4.3 s segment"
+   "video": "C3902.mp4",
+   "t": 82.5,
+   "img": "img/ex/C3902_jaywalking_824.jpg",
+   "note": "15.9 s segment"
   },
   {
    "cls": "jaywalking",
-   "video": "C3905.mp4",
-   "t": 105.3,
-   "img": "img/ex/C3905_jaywalking_1053.jpg",
-   "note": "3.2 s segment"
+   "video": "C3897.mp4",
+   "t": 79.1,
+   "img": "img/ex/C3897_jaywalking_791.jpg",
+   "note": "10.4 s segment"
   },
   {
    "cls": "failure_to_yield",
@@ -147,38 +186,145 @@
   },
   {
    "cls": "failure_to_yield",
-   "video": "C3905.mp4",
-   "t": 109.3,
-   "img": "img/ex/C3905_failure_to_yield_1093.jpg",
-   "note": "1.6 s segment"
+   "video": "C3897.mp4",
+   "t": 221.4,
+   "img": "img/ex/C3897_failure_to_yield_2214.jpg",
+   "note": "3.1 s segment"
+  },
+  {
+   "cls": "red_light",
+   "video": "C3896.mp4",
+   "t": 79.0,
+   "img": "img/ex/C3896_red_light_790.jpg",
+   "note": "12.0 s segment"
   },
   {
    "cls": "stop_line",
-   "video": "C3905.mp4",
-   "t": 75.4,
-   "img": "img/ex/C3905_stop_line_754.jpg",
-   "note": "39.0 s segment"
+   "video": "C3896.mp4",
+   "t": 216.2,
+   "img": "img/ex/C3896_stop_line_2162.jpg",
+   "note": "42.3 s segment"
   },
   {
    "cls": "stop_line",
-   "video": "C3905.mp4",
-   "t": 77.9,
-   "img": "img/ex/C3905_stop_line_779.jpg",
-   "note": "36.4 s segment"
+   "video": "C3897.mp4",
+   "t": 134.7,
+   "img": "img/ex/C3897_stop_line_1346.jpg",
+   "note": "40.3 s segment"
   },
   {
    "cls": "stopped_vehicle",
-   "video": "C3905.mp4",
-   "t": 9.5,
-   "img": "img/ex/C3905_stopped_vehicle_94.jpg",
-   "note": "27.1 s segment"
+   "video": "C3902.mp4",
+   "t": 68.7,
+   "img": "img/ex/C3902_stopped_vehicle_687.jpg",
+   "note": "151.5 s segment"
+  },
+  {
+   "cls": "stopped_vehicle",
+   "video": "C3902.mp4",
+   "t": 130.5,
+   "img": "img/ex/C3902_stopped_vehicle_1305.jpg",
+   "note": "130.0 s segment"
   }
  ],
- "failures": [],
+ "failures": [
+  {
+   "cls": "failure_to_yield",
+   "video": "C3902.mp4",
+   "t": 244.0,
+   "img": "img/fail/C3902_failure_to_yield_244.jpg",
+   "note": "Occlusion: a bus hides the far crossing; we flagged a car whose pedestrians were still on the kerb. Not in our labels (false positive)."
+  },
+  {
+   "cls": "failure_to_yield",
+   "video": "C3902.mp4",
+   "t": 12.8,
+   "img": "img/fail/C3902_failure_to_yield_12.jpg",
+   "note": "Pedestrians waiting at the kerb of crossing B look ‘on the crossing’ from this angle; the car passes them without a conflict (false positive)."
+  },
+  {
+   "cls": "jaywalking",
+   "video": "C3902.mp4",
+   "t": 100.0,
+   "img": "img/fail/C3902_jaywalking_100.jpg",
+   "note": "Far refuge island: at 40 px tall, 10 px of foot position decides kerb vs. road. We now ignore people under 4.5 % of the frame height, which also drops some true cases far away."
+  },
+  {
+   "cls": "stop_line",
+   "video": "C3905.mp4",
+   "t": 95.0,
+   "img": "img/fail/C3905_stop_line_95.jpg",
+   "note": "Blocked junction at dusk: the queue stands on crossing A for 40 s while people weave between cars. We report one long stop_line segment; annotators might split it or call part of it congestion."
+  }
+ ],
  "dev": {
-  "intro": "",
-  "header": [],
-  "rows": []
+  "intro": "We labelled the sample clips ourselves with the organisers' start/end conventions (95 segments). C3905 and C3902 were labelled by watching the clips and checking every candidate from a deliberately loose version of our rules; C3897 and C3896 only by verifying our own detections frame by frame, so on those two clips the table measures precision, not recall. The labels share our blind spots: treat these numbers as a sanity check, not a test-set estimate. Scores are the official <code>evaluate.py</code> run on <code>predictions_samples.json</code>.",
+  "header": [
+   "class",
+   "labelled",
+   "predicted",
+   "F1@0.3",
+   "F1@0.5",
+   "F1@0.7",
+   "mean F1"
+  ],
+  "rows": [
+   [
+    "failure_to_yield",
+    54,
+    54,
+    "0.96",
+    "0.96",
+    "0.94",
+    "0.96"
+   ],
+   [
+    "jaywalking",
+    23,
+    27,
+    "0.80",
+    "0.72",
+    "0.72",
+    "0.75"
+   ],
+   [
+    "red_light",
+    1,
+    1,
+    "1.00",
+    "1.00",
+    "1.00",
+    "1.00"
+   ],
+   [
+    "stop_line",
+    8,
+    8,
+    "1.00",
+    "1.00",
+    "1.00",
+    "1.00"
+   ],
+   [
+    "stopped_vehicle",
+    9,
+    9,
+    "1.00",
+    "1.00",
+    "1.00",
+    "1.00"
+   ],
+   [
+    "<b>Score A</b>",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "<b>0.941</b>"
+   ]
+  ],
+  "score_a": 0.9406913580246913
  },
  "team": [
   {
