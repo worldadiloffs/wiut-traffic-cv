@@ -367,11 +367,15 @@
    "name": "Farrux Buriev",
    "role": "Website, live demo & visualisation",
    "did": "This website; the in-browser live demo (ONNX Runtime Web, same rules as the submission); annotated sample videos, timelines, risk curves and the operator view.",
-   "projects": "",
+   "projects": "Android apps in Kotlin (28 public repositories, incl. an olx.uz marketplace client and UI animation libraries); works at the intersection of mobile development and AI",
    "links": [
     [
      "LinkedIn",
      "https://www.linkedin.com/in/farrukh-buriyev-b21975322/"
+    ],
+    [
+     "GitHub",
+     "https://github.com/farrukhburiev"
     ]
    ]
   }
