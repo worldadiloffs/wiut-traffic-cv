@@ -13,9 +13,9 @@ const fmt = s => { s = Math.max(0, s); const m = Math.floor(s / 60); return `${m
 $("#menu").onclick = () => $("#nav").classList.toggle("open");
 document.querySelectorAll("#nav a").forEach(a => a.onclick = () => $("#nav").classList.remove("open"));
 
-const site = await (await fetch("data/site.json")).json();
+const site = await (await fetch("data/site.json", { cache: "no-cache" })).json();
 const videos = {};
-for (const v of site.videos) videos[v.name] = await (await fetch(`data/${v.stem}.json`)).json();
+for (const v of site.videos) videos[v.name] = await (await fetch(`data/${v.stem}.json`, { cache: "no-cache" })).json();
 
 // ------------------------------------------------------------------ hero
 $("#hero-stats").innerHTML = site.stats.map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
@@ -213,8 +213,8 @@ $("#team-cards").innerHTML = site.team.map(m => `<div class="member"><h3>${m.nam
 $("#link-list").innerHTML = site.links.map(([t, u, n]) => `<li><a href="${u}" target="_blank" rel="noopener">${t}</a>${n ? ` <span class="muted">— ${n}</span>` : ""}</li>`).join("");
 
 // ------------------------------------------------------------------ demo
-const sceneCfg = await (await fetch("data/scene.json")).json();
-const flow = await (await fetch("data/flow.json")).json();
+const sceneCfg = await (await fetch("data/scene.json", { cache: "no-cache" })).json();
+const flow = await (await fetch("data/flow.json", { cache: "no-cache" })).json();
 const scene = new Scene(sceneCfg, flow);
 let detector = null, demoResult = null;
 const status = t => { $("#demo-status").textContent = t; };
