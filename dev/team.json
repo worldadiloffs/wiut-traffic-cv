@@ -1,53 +1,49 @@
 [
  {
   "name": "Abdumajid Adilov",
-  "role": "Team captain · ML & systems",
-  "did": "Pipeline design, detection/tracking, scene registration, event rules, evaluation harness.",
-  "projects": "FitAI (Flutter fitness app, founder/CTO); Eco-Schools Uzbekistan projects",
+  "role": "Team captain · detection, tracking & submission",
+  "did": "Pipeline architecture; YOLO11 + ByteTrack tracking; registration of every clip to one canonical view; the event rules; Part B risk model; packaging solution.py so it runs with one command offline.",
+  "projects": "Fit AI (founder) — wellness app for Uzbekistan with AI food scanning, GPS workouts and health sync, in English, Russian and Uzbek",
   "links": [
+   [
+    "LinkedIn",
+    "https://www.linkedin.com/in/abdumajid-adilov/"
+   ],
    [
     "GitHub",
     "https://github.com/worldadiloffs"
    ],
    [
-    "LinkedIn — add link",
-    ""
-   ],
-   [
-    "Portfolio — add link",
-    ""
+    "Fit AI",
+    "https://www.fitaiapp.uz/"
    ]
   ]
  },
  {
-  "name": "Team member 2 — add name",
-  "role": "add role",
-  "did": "add contribution",
-  "projects": "",
+  "name": "Elnur Mavlonov",
+  "role": "Signal reading, dev labels & evaluation",
+  "did": "Reading the traffic-signal phase from the lamp pixels (per-clip normalisation, hysteresis); our own labels of the four sample clips; running the official metric and the ablations; EDA of the samples.",
+  "projects": "Research assistant in semi-supervised ML (graph Laplacians) at NewUU; 2nd place, RoboWar combat robots (NewUU, 2026); Top 20 of 1,300+ at the Ai500! hackathon; medical image segmentation at CAU Tech Hack ’26; leads Team ~105",
   "links": [
    [
-    "GitHub — add link",
-    ""
+    "LinkedIn",
+    "https://www.linkedin.com/in/elnur-mavlonov"
    ],
    [
-    "LinkedIn — add link",
-    ""
+    "GitHub",
+    "https://github.com/elnurmavlonov"
    ]
   ]
  },
  {
-  "name": "Team member 3 — add name",
-  "role": "add role",
-  "did": "add contribution",
+  "name": "Farrux Buriev",
+  "role": "Website, live demo & visualisation",
+  "did": "This website; the in-browser live demo (ONNX Runtime Web, same rules as the submission); annotated sample videos, timelines, risk curves and the operator view.",
   "projects": "",
   "links": [
    [
-    "GitHub — add link",
-    ""
-   ],
-   [
-    "LinkedIn — add link",
-    ""
+    "LinkedIn",
+    "https://www.linkedin.com/in/farrukh-buriyev-b21975322/"
    ]
   ]
  }

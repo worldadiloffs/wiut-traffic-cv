@@ -125,7 +125,7 @@ predictions_samples.json our output on the sample clips
 Reproduce the sample predictions and the website data:
 
 ```bash
-python run_submission.py --videos samples --out predictions_samples.json --team junction-watch
+python run_submission.py --videos samples --out predictions_samples.json --team team-105
 python evaluate.py --pred predictions_samples.json --gt dev/dev_labels.json --per-video
 python -m src.traffic.calibrate cache/final/*.npz      # rebuild the flow field (optional)
 python tools/build_site.py --videos samples            # website data, annotated videos
@@ -143,6 +143,10 @@ python tools/build_site.py --videos samples            # website data, annotated
 No external dataset was used for training; nothing was fine-tuned. Our own labels of the sample clips
 (`dev/dev_labels.json`) were made by us for evaluation only.
 
-## Team
+## Team ~105
 
-See the website's Team section for roles, contributions and links.
+| member | role | main contributions |
+|---|---|---|
+| Abdumajid Adilov (captain) | detection, tracking & submission | pipeline architecture, YOLO11 + ByteTrack, view registration, event rules, Part B, packaging |
+| Elnur Mavlonov | signal reading, dev labels & evaluation | lamp-pixel signal phase, our labels of the sample clips, official metric runs, ablations, EDA |
+| Farrux Buriev | website, live demo & visualisation | website, in-browser demo (ONNX Runtime Web), annotated videos, timelines, risk curves |

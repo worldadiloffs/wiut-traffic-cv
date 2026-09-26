@@ -16,7 +16,7 @@ from dev_events import load_ex
 from src.traffic.pipeline import analyze_extracted
 import solution
 
-out = {"team": sys.argv[1] if len(sys.argv) > 1 else "junction-watch", "videos": {}, "log": {}}
+out = {"team": sys.argv[1] if len(sys.argv) > 1 else "team-105", "videos": {}, "log": {}}
 for p in sorted(glob.glob(str(ROOT / "cache" / "final" / "*.npz"))):
     name = Path(p).stem.split("_")[0]
     an = analyze_extracted(load_ex(name))
